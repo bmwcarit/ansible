@@ -129,6 +129,7 @@ try:
     from winrm import Response
     from winrm.exceptions import WinRMOperationTimeoutError
     from winrm.protocol import Protocol
+    import requests.exceptions
     HAS_WINRM = True
 except ImportError as e:
     HAS_WINRM = False
@@ -477,6 +478,8 @@ class Connection(ConnectionBase):
                 raise AnsibleError('winrm send_input failed; \nstdout: %s\nstderr %s' % (to_native(response.std_out), to_native(stderr)))
 
             return response
+        except requests.exceptions.ConnectionError as exc:
+            raise AnsibleConnectionFailure('winrm connection error: %s' % exc)
         finally:
             if command_id:
                 self.protocol.cleanup_command(self.shell_id, command_id)
